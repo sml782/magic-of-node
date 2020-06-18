@@ -1,8 +1,10 @@
 const Koa = require('koa');
 const static = require('koa-static');
-const app = new Koa();
 const router = require('./router');
+const ipstable = require('./ipstable');
+const app = new Koa();
 
+app.use(ipstable);
 
 app.use(async (ctx,next) => {
   const start = new Date().getTime();
