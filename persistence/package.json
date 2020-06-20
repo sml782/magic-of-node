@@ -1,0 +1,19 @@
+{
+  "name": "persistence",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "exp1": "node src/mysql/use-sequlize-01.js",
+    "exp2": "node src/mysql/use-sequlize-02.js",
+    "exp3": "node src/mysql/use-sequlize-03.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mysql2": "^2.1.0",
+    "sequelize": "^5.21.13"
+  }
+}
