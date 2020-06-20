@@ -17,6 +17,7 @@ const sequelize = new Sequelize('magic', 'root', '123456', {
   },
 });
 // console.log(sequelize);
+// console.log(11111, sequelize.Sequelize === Sequelize);
 
 // 测试连接是否正常
 // 使用 `.authenticate()` 函数来测试连接是否正常
@@ -95,18 +96,18 @@ const Fruit = sequelize.define(
 
 (async () => {
   // 同步数据库，force: true 则会删除已存在表
-  const model = await Fruit.sync({ force: true });
+  // const model = await Fruit.sync();
   // console.log('sync', model);
 
-  const createRes = await Fruit.create({
-    name: '⾹香蕉',
-    price: 23
-  });
+  // const createRes = await Fruit.create({
+  //   name: '⾹香蕉',
+  //   price: 23
+  // });
   // console.log('create', createRes);
 
-  let all = await Fruit.findAll();
+  // let all = await Fruit.findAll();
   // console.log('findAll', JSON.stringify(all, null, 4));
-  const [aaa] = all;
+  // const [aaa] = all;
   // 触发实例设置方法
   // aaa.amount = '220kg';
   // aaa.save();
@@ -125,13 +126,13 @@ const Fruit = sequelize.define(
   // });
   // console.log('findAll', JSON.stringify(all, null, '\t'));
 
-  Fruit.bulkCreate(
-    [
-      { id: '511a4d90-b308-11ea-be2a-25978b6a0de9', name: '火龙果', price: 777 }
-    ],
-    {
-      // 如果主键重复就更新字段, true 所有, []
-      updateOnDuplicate: true,
-    }
-  );
+  // Fruit.bulkCreate(
+  //   [
+  //     { id: '511a4d90-b308-11ea-be2a-25978b6a0de9', name: '火龙果', price: 777 }
+  //   ],
+  //   {
+  //     // 如果主键重复就更新字段, true 所有, []
+  //     updateOnDuplicate: true,
+  //   }
+  // );
 })();
