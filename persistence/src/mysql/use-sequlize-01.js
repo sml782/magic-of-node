@@ -98,10 +98,10 @@ const Fruit = sequelize.define(
   const model = await Fruit.sync({ force: true });
   // console.log('sync', model);
 
-  // const createRes = await Fruit.create({
-  //   name: '⾹香蕉',
-  //   price: 23
-  // });
+  const createRes = await Fruit.create({
+    name: '⾹香蕉',
+    price: 23
+  });
   // console.log('create', createRes);
 
   let all = await Fruit.findAll();
@@ -125,5 +125,13 @@ const Fruit = sequelize.define(
   // });
   // console.log('findAll', JSON.stringify(all, null, '\t'));
 
-  //
+  Fruit.bulkCreate(
+    [
+      { id: '511a4d90-b308-11ea-be2a-25978b6a0de9', name: '火龙果', price: 777 }
+    ],
+    {
+      // 如果主键重复就更新字段, true 所有, []
+      updateOnDuplicate: true,
+    }
+  );
 })();
