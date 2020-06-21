@@ -1,4 +1,4 @@
-const sequelize = require('../util/database');
+const sequelize = require('../db/index');
 const Sequelize = sequelize.Sequelize;
 
 module.exports = sequelize.define('cartItem', {
