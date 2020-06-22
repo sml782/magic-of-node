@@ -1,31 +1,12 @@
 const express = require('express');
 const route = express.Router();
 const Product = require('../models/product');
+const admin = require('../controllers/admin');
 
-route.get('/products', async (req, res) => {
-  const products = await Product.findAll();
-  res.json({
-    data: products,
-    success: true,
-  });
-});
+route.get('/products', admin.list);
 
-route.post('/product', async (req, res) => {
-  const body = req.body;
-  const result = await req.user.createProduct(body);
-  res.json({
-    data: result,
-    success: true,
-  });
-});
+route.put('/product', admin.add);
 
-route.delete('/product/:id', async (req, res) => {
-  const id = req.params.id;
-  const result = await Product.destroy({ where: { id } });
-  res.json({
-    data: result,
-    success: true,
-  });
-});
-console.log(route);
+route.delete('/product', admin.delete);
+
 module.exports = route;

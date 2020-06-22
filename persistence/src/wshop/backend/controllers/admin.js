@@ -1,15 +1,27 @@
-const express = require('express');
-const route = express.Router();
-const Product = require('../models/product');
+const adminServices = require('../services/admin');
 
-route.get('/products', function(req, res) {
-  const products = await Product.findAll();
-  res.json(products);
-});
+exports.list = async function(req, res) {
+  const products = await adminServices.getList();
+  res.json({
+    data: products,
+    success: true,
+  });
+};
 
-route.get('/users', function(req, res) {
+exports.add = async function(req, res) {
+  const body = req.body;
+  const result = await adminServices.add(req.user, body);
+  res.json({
+    data: result,
+    success: true,
+  });
+};
 
-  res.send('List of APIv1 users.');
-});
-
-module.exports = apiv1;
+exports.delete = async function(req, res) {
+  const id = req.query.id;
+  const result = await adminServices.delete({ id });
+  res.json({
+    data: result,
+    success: !!result,
+  });
+};
