@@ -31,7 +31,10 @@ class Admin {
   }
 
   async deleteCart(db, params) {
-    const products = await this.getCarts(params);
+    const cart = await db.getCart();
+    const products = await cart.getProducts({
+      where: params,
+    });
     if (!products.length) {
       return null;
     }

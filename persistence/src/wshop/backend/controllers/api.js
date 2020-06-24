@@ -19,7 +19,7 @@ exports.addCart = async function(req, res) {
 
 exports.deleteCart = async function(req, res) {
   const id = req.query.id;
-  const result = await commonServices.de({ id });
+  const result = await commonServices.deleteCart(req.user, { id });
   res.json({
     data: result,
     success: !!result,
