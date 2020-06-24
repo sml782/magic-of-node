@@ -2,6 +2,8 @@ const Product = require('../models/product');
 
 class Admin {
   getList() {
+    const pp =  Product.build({ title: '123', price: 213 });
+    console.log(pp)
     return Product.findAll();
   }
 

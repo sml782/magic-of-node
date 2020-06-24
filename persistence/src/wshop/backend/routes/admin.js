@@ -1,12 +1,11 @@
 const express = require('express');
-const route = express.Router();
-const Product = require('../models/product');
+const router = express.Router();
 const admin = require('../controllers/admin');
 
-route.get('/products', admin.list);
+router.get('/products', admin.list);
 
-route.put('/product', admin.add);
+router.put('/product', admin.add);
 
-route.delete('/product', admin.delete);
+router.delete('/product', admin.delete);
 
-module.exports = route;
+module.exports = router;

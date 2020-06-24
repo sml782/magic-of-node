@@ -14,6 +14,8 @@ const sequelize = new Sequelize('magic', 'root', '123456', {
   define: {
     // timestamps: false,
     underscored: true,
+    // 软删除
+    paranoid: false
   },
 });
 // console.log(sequelize);

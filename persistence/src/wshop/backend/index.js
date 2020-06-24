@@ -5,6 +5,7 @@ const app = Express();
 const db = require('./db/index');
 const User = require('./models/user');
 const adminRoute = require('./routes/admin');
+const apiRoute = require('./routes/api');
 
 // app.use(cors());
 app.use('/static', Express.static(path.join(__dirname, 'public')));
@@ -19,6 +20,7 @@ app.use(async (req, res, next) => {
 });
 
 app.use('/admin', adminRoute);
+app.use('/api', apiRoute);
 
 db.sync().then(async (result) => {
   let user = await User.findByPk(1);
