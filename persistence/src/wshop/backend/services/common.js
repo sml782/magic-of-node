@@ -47,6 +47,30 @@ class Admin {
       order: [['createdAt', 'DESC']],
     });
   }
+
+  async addOrder(db) {
+    const cart = await db.getCart();
+    const products = await cart.getProducts();
+    const order = await db.createOrder();
+    const productList = products.map(p => {
+      p.orderItem = {
+        quantity: p.cartItem.quantity,
+      }
+      return p;
+    });
+    return await order.addProducts(productList);
+  }
+
+  async deleteOrder(db, params) {
+    const [order] = await db.getOrders({
+      where: params
+    });
+    if (!order) {
+      return true;
+    }
+    await order.destroy();
+    return true;
+  }
 }
 
 module.exports = new Admin();
