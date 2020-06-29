@@ -4,15 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "exp1": "node src/mysql/use-sequlize-01.js",
-    "exp2": "node src/mysql/use-sequlize-02.js",
-    "exp3": "node src/mysql/use-sequlize-03.js",
+    "exp:my1": "node src/mysql/use-sequlize-01.js",
+    "exp:my2": "node src/mysql/use-sequlize-02.js",
+    "exp:my3": "node src/mysql/use-sequlize-03.js",
+    "exp:mo1": "node src/mongo/mongo-1.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "mongodb": "^3.5.9",
     "mysql2": "^2.1.0",
     "sequelize": "^5.21.13"
   }
