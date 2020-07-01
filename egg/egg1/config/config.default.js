@@ -46,6 +46,12 @@ module.exports = appInfo => {
     // validateRoot: false,
   };
 
+  config.jwt = {
+    secret: 'Great4-M',
+    enable: true, // default is false
+    match: /^\/user/, // optional
+  };
+
   // error
   config.errorHandler = {
     match: '/',
