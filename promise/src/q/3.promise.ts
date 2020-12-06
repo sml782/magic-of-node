@@ -16,33 +16,37 @@ const enum STATUS {
 
 const state = Symbol.for('[[PromiseState]]');
 const result = Symbol.for('[[PromiseResult]]');
-const onResolveCallbacks = Symbol.for('[[PromiseOnResolveCallbacks]]');
-const onRejectCallbacks = Symbol.for('[[PromiseOnRejectCallbacks]]');
+const onFulfilledCallbacks = Symbol.for('[[PromiseOnFulfilledCallbacks]]');
+const onRejectedCallbacks = Symbol.for('[[PromiseOnRejectedCallbacks]]');
 const handleExecute = Symbol.for('[[PromiseHandleExecute]]');
 
-class SPromise {
+class SPromise<T> {
   [state]: STATUS = STATUS.pending;
   [result]: any;
-  [onResolveCallbacks]: Function[] = [];
-  [onRejectCallbacks]: Function[] = [];
-  constructor(executor: Function) {
-    const resolve = (value: any) => {
+  [onFulfilledCallbacks]: Function[] = [];
+  [onRejectedCallbacks]: Function[] = [];
+  constructor(executor: (resolve: (value?: T | unknown) => void, reject: (reason?: any) => void) => void) {
+    const resolve = (value?: T | unknown) => {
       if (this[state] !== STATUS.pending) {
         return;
       }
       this[state] = STATUS.fulfilled;
       this[result] = value;
-      this[onResolveCallbacks].forEach(cb => cb());
+      this[onFulfilledCallbacks].forEach(cb => cb());
     };
-    const reject = (reason: any) => {
+    const reject = (reason?: any) => {
       if (this[state] !== STATUS.pending) {
         return;
       }
       this[state] = STATUS.rejected;
       this[result] = reason;
-      this[onRejectCallbacks].forEach(cb => cb());
+      this[onRejectedCallbacks].forEach(cb => cb());
     };
-    executor(resolve, reject);
+    try {
+      executor(resolve, reject);
+    } catch (err) {
+      reject(err);
+    }
   }
 
   [handleExecute](resolve: Function, reject: Function, callback?: Function, ) {
@@ -54,20 +58,20 @@ class SPromise {
     }
   }
 
-  then(onResolved?: Function, onRejected?: Function): SPromise {
+  then(onfulfilled?: (value: unknown) => unknown, onrejected?: (reason: any) => any): SPromise<unknown> {
     return new SPromise((resolve: any, reject: any) => {
       switch (this[state]) {
         case STATUS.fulfilled:
-          return this[handleExecute](resolve, reject, onResolved);
+          return this[handleExecute](resolve, reject, onfulfilled);
         case STATUS.rejected:
-          return this[handleExecute](resolve, reject, onRejected);
+          return this[handleExecute](resolve, reject, onrejected);
         case STATUS.pending:
         default:
-          this[onResolveCallbacks].push(() => {
-            this[handleExecute](resolve, reject, onResolved);
+          this[onFulfilledCallbacks].push(() => {
+            this[handleExecute](resolve, reject, onfulfilled);
           });
-          this[onRejectCallbacks].push(() => {
-            this[handleExecute](resolve, reject, onRejected);
+          this[onRejectedCallbacks].push(() => {
+            this[handleExecute](resolve, reject, onrejected);
           });
           return;
       }
@@ -104,5 +108,6 @@ promise
 )
 
 // new Promise()
+// new Promise(() => {}).then();
 
 // export default SPromise;
