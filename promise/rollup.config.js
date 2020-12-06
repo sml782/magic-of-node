@@ -5,6 +5,7 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 export default {
   input: 'src/index.ts',
   output: {
+    exports: 'auto',
     format: 'cjs', // commonjs规范 umd esm iife
     file: path.resolve('dist/bundle.js'),
   },
