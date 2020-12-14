@@ -24,7 +24,7 @@ export type Executor<T> = (resolve: Resolve<T>, reject: Reject) => void;
 /**
  * 成功回调
  */
-export type FulfilledCB<T> = (value: T) => T | PromiseLike<T>;
+export type FulfilledCB<T> = (value: T) => T | PromiseLike<T> | null;
 /**
  * 成功回调表
  */

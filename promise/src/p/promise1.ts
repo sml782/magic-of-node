@@ -77,6 +77,38 @@ class SPromise<T> {
     return new SPromise((resolve, reject) => reject(reason));
   }
 
+  static all = <T>(values: Iterable<T | PromiseLike<T>>): SPromise<T[]> => {
+    return new SPromise((resolve, reject) => {
+      const result: T[] = [];
+      const vs = Array.from(values);
+      let resNum = 0;
+      const addResult = (val: T, i: number) => {
+        result[i] = val;
+        if (++resNum === vs.length) {
+          return resolve(result);
+        }
+      };
+      // const val Object.values(values);
+      // values.
+      for (let idx in vs) {
+        const promise = vs[idx];
+        if (!isPromise<T>(promise)) {
+          return addResult(promise, Number(idx));
+        }
+        promise.then(
+          y => {
+            addResult(y, Number(idx));
+            console.log(result)
+            return y;
+          },
+          r => {
+            reject(r);
+          }
+        );
+      }
+    });
+  }
+
   constructor(executor: Executor<T>) {
     const resolve = (value?: T) => {
       if (this[state] !== STATE.pending) {
