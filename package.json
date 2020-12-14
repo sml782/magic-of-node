@@ -1,0 +1,29 @@
+{
+  "name": "magic-of-node",
+  "version": "1.0.0",
+  "description": "From introduction to mastery",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sml782/magic-of-node.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sml782/magic-of-node/issues"
+  },
+  "homepage": "https://github.com/sml782/magic-of-node#readme",
+  "devDependencies": {
+    "@types/node": "^14.14.13",
+    "nodemon": "^2.0.6",
+    "promises-aplus-tests": "^2.1.2"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "koa": "file:koa"
+  }
+}
