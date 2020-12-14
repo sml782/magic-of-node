@@ -124,4 +124,4 @@ promise
 // new Promise()
 // new Promise(() => {}).then();
 
-// export default SPromise;
+export default SPromise;
