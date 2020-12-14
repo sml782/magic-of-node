@@ -10,9 +10,12 @@ const promise = new SPromise((resolve, reject) => {
 promise
 .then(
   (value) => {
-    console.log(1111, value);
-    // throw new Error('23133');
-    return 1111;
+    // console.log(1111, value);
+    // // throw new Error('23133');
+    // return 1111;
+    return new SPromise((resolve => {
+      setTimeout(() => resolve(23456789), 1000);
+    }));
   },
   (reason) => {
     console.log(2222, reason);
@@ -29,7 +32,7 @@ promise
 )
 
 // new Promise()
-// new Promise(() => {}).then();
+// new Promise<string>(() => {}).then();
 
 // export default SPromise;
 
