@@ -33,15 +33,21 @@ function resolvePromise<T>(promise2: PromiseLike<unknown>,  x: unknown, resolve:
     return reject(new TypeError('我死循环了啊'));
   }
   if (isPromise(x)) {
+    let called = false;
     try {
       const then = x.then;
       return then.call(
         x,
         y => {
+          if (called) return;
+          called = true;
+          // 结果有可能还是 Promise, 走递归
           return resolvePromise(promise2, y, resolve, reject);
         },
-        e => {
-          return reject(e);
+        r => {
+          if (called) return;
+          called = true;
+          return reject(r);
         }
       );
     } catch (err) {
