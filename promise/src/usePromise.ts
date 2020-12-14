@@ -1,5 +1,9 @@
 import SPromise from './p/promise1';
+// import { register } from 'ts-node';
 
+// register()
+
+// console.log(tsNode);
 const promise = new SPromise((resolve, reject) => {
   // resolve(666);
   // reject(123456);

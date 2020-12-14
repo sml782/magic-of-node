@@ -28,14 +28,14 @@ import {
  * @param {Reject} reject 失败回调
  * @returns
  */
-function resolvePromise<T>(promise2: PromiseLike<unknown>,  x: unknown, resolve: Resolve<T>, reject: Reject) {
+function resolvePromise<T>(promise2: PromiseLike<unknown>,  x: unknown, resolve: Resolve<T>, reject: Reject): any {
   if (x === promise2) {
     return reject(new TypeError('我死循环了啊'));
   }
   if (isPromise(x)) {
     try {
       const then = x.then;
-      then.call(
+      return then.call(
         x,
         y => {
           return resolvePromise(promise2, y, resolve, reject);
