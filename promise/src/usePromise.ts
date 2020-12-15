@@ -43,7 +43,7 @@ SPromise.all([
 ]).then(v => {
   console.log(v);
   return v;
-}).catch(v => console.log(v))
+}).catch(v => console.log(v));
 // new SPromise(() => {}).then(() => {})
 // new Promise()
 // new Promise<string>(() => {}).then();
@@ -53,7 +53,8 @@ SPromise.all([
 //   Promise.resolve(3),
 //   2
 // ]).catch
-// new Promise().catch
+// new Promise<number>((res) => res(6)).catch
+// Promise.race
 // export default SPromise;
 
 export {};

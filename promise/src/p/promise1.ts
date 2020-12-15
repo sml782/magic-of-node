@@ -26,9 +26,9 @@ import {
  * @param {unknown} x 上次调用结果
  * @param {Resolve<T>} resolve 成功回调
  * @param {Reject} reject 失败回调
- * @returns
+ * @returns {*}
  */
-function resolvePromise<T>(promise2: PromiseLike,  x: unknown, resolve: Resolve<T>, reject: Reject): any {
+function resolvePromise<T = unknown>(promise2: PromiseLike,  x: unknown, resolve: Resolve<T>, reject: Reject): any {
   if (x === promise2) {
     return reject(new TypeError('我死循环了啊'));
   }
@@ -173,6 +173,7 @@ class SPromise<T = unknown> {
     onrejected = typeof onfulfilled === 'function' ? onrejected : ((reason) => { throw reason });
 
     const promise2 = new SPromise<TResult1 | TResult1>((resolve, reject) => {
+      // 放在宏任务队列中，方便取 promise2
       setTimeout(() => {
         switch (this[state]) {
           case STATE.fulfilled: {
