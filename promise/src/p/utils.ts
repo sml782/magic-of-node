@@ -1,6 +1,6 @@
 import { PromiseLike } from './interface';
 
-export const isPromise = <T>(promise: any): promise is PromiseLike<T> => {
+export const isPromise = <T = unknown>(promise: any): promise is PromiseLike<T> => {
   if (
     typeof promise === 'function'
     ||

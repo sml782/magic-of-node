@@ -63,17 +63,17 @@ function resolvePromise<T>(promise2: PromiseLike,  x: unknown, resolve: Resolve<
  * @class SPromise
  * @template T
  */
-class SPromise<T> {
+class SPromise<T = unknown> {
   [state]: STATE = STATE.pending;
   [result]: T;
   [fulfilledCBs]: FulfilledCBs<T>[] = [];
   [rejectedCBs]: RejectedCBs[] = [];
 
-  static resolve = (value?: unknown) => {
+  static resolve = <T>(value: T): SPromise<T> => {
     return new SPromise((resolve) => resolve(value));
   }
 
-  static reject = (reason?: any) => {
+  static reject = <T = never>(reason?: any): SPromise<T> => {
     return new SPromise((resolve, reject) => reject(reason));
   }
 
@@ -91,18 +91,41 @@ class SPromise<T> {
       for (let idx in vs) {
         const promise = vs[idx];
         if (!isPromise<T>(promise)) {
-          return addResult(promise, Number(idx));
+          addResult(promise, Number(idx));
+        } else {
+          promise.then(
+            y => {
+              addResult(y, Number(idx));
+              console.log(result)
+              return y;
+            },
+            r => {
+              reject(r);
+            }
+          );
         }
-        promise.then(
-          y => {
-            addResult(y, Number(idx));
-            console.log(result)
-            return y;
-          },
-          r => {
-            reject(r);
-          }
-        );
+      }
+    });
+  }
+
+  static race = <T>(values: Iterable<T | PromiseLike<T>>): SPromise<T extends PromiseLike<infer U> ? U : T> => {
+    return new SPromise((resolve, reject) => {
+      const vs = Array.from(values);
+      for (let idx in vs) {
+        const promise = vs[idx];
+        if (!isPromise(promise)) {
+          resolve(promise as T extends PromiseLike<infer U> ? U : T);
+        } else {
+          promise.then(
+            y => {
+              resolve(y as T extends PromiseLike<infer U> ? U : T);
+              return y;
+            },
+            r => {
+              reject(r);
+            }
+          );
+        }
       }
     });
   }
