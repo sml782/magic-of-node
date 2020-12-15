@@ -28,7 +28,7 @@ import {
  * @param {Reject} reject 失败回调
  * @returns
  */
-function resolvePromise<T>(promise2: PromiseLike<unknown>,  x: unknown, resolve: Resolve<T>, reject: Reject): any {
+function resolvePromise<T>(promise2: PromiseLike,  x: unknown, resolve: Resolve<T>, reject: Reject): any {
   if (x === promise2) {
     return reject(new TypeError('我死循环了啊'));
   }
@@ -78,7 +78,7 @@ class SPromise<T> {
   }
 
   static all = <T>(values: Iterable<T | PromiseLike<T>>): SPromise<T[]> => {
-    return new SPromise((resolve, reject) => {
+    return new SPromise<T[]>((resolve, reject) => {
       const result: T[] = [];
       const vs = Array.from(values);
       let resNum = 0;
@@ -88,8 +88,6 @@ class SPromise<T> {
           return resolve(result);
         }
       };
-      // const val Object.values(values);
-      // values.
       for (let idx in vs) {
         const promise = vs[idx];
         if (!isPromise<T>(promise)) {
@@ -133,42 +131,42 @@ class SPromise<T> {
     }
   }
 
-  [handleExecute](resolve: Resolve<T>, reject: Reject, promise2: PromiseLike<T>, callback?: FulfilledCB<T> | RejectedCB | null) {
+  [handleExecute]<TResult>(resolve: Resolve<TResult>, reject: Reject, promise2: PromiseLike<T>, callback?: FulfilledCB | RejectedCB) {
     try {
       if (!callback) {
         return resolve();
       }
       const x = callback(this[result]);
-      return resolvePromise<T>(promise2, x, resolve, reject);
+      return resolvePromise<TResult>(promise2, x, resolve, reject);
     } catch (err) {
       reject(err);
     }
   }
 
-  then(onfulfilled?: FulfilledCB<T> | null, onrejected?: RejectedCB | null): SPromise<T> {
+  then<TResult1 = T, TResult2 = never>(onfulfilled?: FulfilledCB<TResult1>, onrejected?: RejectedCB<TResult2>): SPromise<TResult1 | TResult2> {
     // 默认给你添加一个成功回调
     onfulfilled = typeof onfulfilled === 'function' ? onfulfilled : ((val) => val);
     // 默认给你添加一个失败回调
     onrejected = typeof onfulfilled === 'function' ? onrejected : ((reason) => { throw reason });
 
-    const promise2 = new SPromise<T>((resolve, reject) => {
+    const promise2 = new SPromise<TResult1 | TResult1>((resolve, reject) => {
       setTimeout(() => {
         switch (this[state]) {
           case STATE.fulfilled: {
-            return this[handleExecute](resolve, reject, promise2, onfulfilled);
+            return this[handleExecute]<TResult1 | TResult1>(resolve, reject, promise2, onfulfilled);
           }
 
           case STATE.rejected: {
-            return this[handleExecute](resolve, reject, promise2, onrejected);
+            return this[handleExecute]<TResult1 | TResult1>(resolve, reject, promise2, onrejected);
           }
 
           default:
           case STATE.pending: {
             this[fulfilledCBs].push(() => {
-              return this[handleExecute](resolve, reject, promise2, onfulfilled);
+              return this[handleExecute]<TResult1 | TResult1>(resolve, reject, promise2, onfulfilled);
             });
             this[rejectedCBs].push(() => {
-              return this[handleExecute](resolve, reject, promise2, onrejected);
+              return this[handleExecute]<TResult1 | TResult1>(resolve, reject, promise2, onrejected);
             });
           }
         }
@@ -177,7 +175,7 @@ class SPromise<T> {
     return promise2;
   }
 
-  catch(onrejected?: RejectedCB): SPromise<T> {
+  catch<TResult = never>(onrejected?: RejectedCB<TResult>): SPromise<T | TResult> {
     return this.then(null, onrejected);
   }
 }

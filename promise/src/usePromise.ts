@@ -44,10 +44,16 @@ SPromise.all([
   console.log(v);
   return v;
 }).catch(v => console.log(v))
-
+// new SPromise(() => {}).then(() => {})
 // new Promise()
-new Promise<string>(() => {}).then();
-Promise.all
+// new Promise<string>(() => {}).then();
+// Promise.all([
+//   // SPromise.reject(new Error('111')),
+//   Promise.resolve(1),
+//   Promise.resolve(3),
+//   2
+// ]).catch
+// new Promise().catch
 // export default SPromise;
 
 export {};
