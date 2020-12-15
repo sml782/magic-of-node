@@ -5,6 +5,7 @@ import {
   rejectedCBs,
   handleExecute,
 } from './const';
+import { isPromise } from './utils';
 import {
   STATE,
   Resolve,
@@ -14,7 +15,47 @@ import {
   FulfilledCBs,
   RejectedCB,
   RejectedCBs,
+  PromiseLike,
 } from './interface';
+
+/**
+ * 整理调用 promise 版本的结果
+ *
+ * @template T
+ * @param {PromiseLike<unknown>} promise2 下一个promise
+ * @param {unknown} x 上次调用结果
+ * @param {Resolve<T>} resolve 成功回调
+ * @param {Reject} reject 失败回调
+ * @returns {*}
+ */
+function resolvePromise<T = unknown>(promise2: PromiseLike,  x: unknown, resolve: Resolve<T>, reject: Reject): any {
+  if (x === promise2) {
+    return reject(new TypeError('我死循环了啊'));
+  }
+  if (isPromise(x)) {
+    let called = false;
+    try {
+      const then = x.then;
+      return then.call(
+        x,
+        y => {
+          if (called) return;
+          called = true;
+          // 结果有可能还是 Promise, 走递归
+          return resolvePromise(promise2, y, resolve, reject);
+        },
+        r => {
+          if (called) return;
+          called = true;
+          return reject(r);
+        }
+      );
+    } catch (err) {
+      return reject(err);
+    }
+  }
+  resolve(x as T);
+};
 
 /**
  * 模拟版 Promise
@@ -22,18 +63,71 @@ import {
  * @class SPromise
  * @template T
  */
-class SPromise<T> {
+class SPromise<T = unknown> {
   [state]: STATE = STATE.pending;
   [result]: T;
   [fulfilledCBs]: FulfilledCBs<T>[] = [];
   [rejectedCBs]: RejectedCBs[] = [];
 
-  static resolve = (value?: unknown) => {
+  static resolve = <T>(value: T): SPromise<T> => {
     return new SPromise((resolve) => resolve(value));
   }
 
-  static reject = (reason?: any) => {
+  static reject = <T = never>(reason?: any): SPromise<T> => {
     return new SPromise((resolve, reject) => reject(reason));
+  }
+
+  static all = <T>(values: Iterable<T | PromiseLike<T>>): SPromise<T[]> => {
+    return new SPromise<T[]>((resolve, reject) => {
+      const result: T[] = [];
+      const vs = Array.from(values);
+      let resNum = 0;
+      const addResult = (val: T, i: number) => {
+        result[i] = val;
+        if (++resNum === vs.length) {
+          return resolve(result);
+        }
+      };
+      for (let idx in vs) {
+        const promise = vs[idx];
+        if (!isPromise<T>(promise)) {
+          addResult(promise, Number(idx));
+        } else {
+          promise.then(
+            y => {
+              addResult(y, Number(idx));
+              console.log(result)
+              return y;
+            },
+            r => {
+              reject(r);
+            }
+          );
+        }
+      }
+    });
+  }
+
+  static race = <T>(values: Iterable<T | PromiseLike<T>>): SPromise<T extends PromiseLike<infer U> ? U : T> => {
+    return new SPromise((resolve, reject) => {
+      const vs = Array.from(values);
+      for (let idx in vs) {
+        const promise = vs[idx];
+        if (!isPromise(promise)) {
+          resolve(promise as T extends PromiseLike<infer U> ? U : T);
+        } else {
+          promise.then(
+            y => {
+              resolve(y as T extends PromiseLike<infer U> ? U : T);
+              return y;
+            },
+            r => {
+              reject(r);
+            }
+          );
+        }
+      }
+    });
   }
 
   constructor(executor: Executor<T>) {
@@ -49,52 +143,63 @@ class SPromise<T> {
       if (this[state] !== STATE.pending) {
         return;
       }
-      this[state] = STATE.fulfilled;
+      this[state] = STATE.rejected;
       this[result] = reason;
       this[rejectedCBs].forEach(fn => fn());
     }
-    executor(resolve, reject);
+    try {
+      executor(resolve, reject);
+    } catch(err) {
+      reject(err);
+    }
   }
 
-  [handleExecute](resolve: Resolve<T>, reject: Reject, callback?: FulfilledCB<T> | RejectedCB | null) {
+  [handleExecute]<TResult>(resolve: Resolve<TResult>, reject: Reject, promise2: PromiseLike<T>, callback?: FulfilledCB | RejectedCB) {
     try {
-      const x = callback && callback(this[result]);
-      resolve(x as T);
+      if (!callback) {
+        return resolve();
+      }
+      const x = callback(this[result]);
+      return resolvePromise<TResult>(promise2, x, resolve, reject);
     } catch (err) {
       reject(err);
     }
   }
 
-  then(onfulfilled?: FulfilledCB<T> | null, onrejected?: RejectedCB | null): SPromise<T> {
+  then<TResult1 = T, TResult2 = never>(onfulfilled?: FulfilledCB<TResult1>, onrejected?: RejectedCB<TResult2>): SPromise<TResult1 | TResult2> {
     // 默认给你添加一个成功回调
-    onfulfilled = onfulfilled || ((val) => val);
+    onfulfilled = typeof onfulfilled === 'function' ? onfulfilled : ((val) => val);
     // 默认给你添加一个失败回调
-    onrejected = onrejected || ((reason) => { throw reason });
+    onrejected = typeof onfulfilled === 'function' ? onrejected : ((reason) => { throw reason });
 
-    return new SPromise<T>((resolve, reject) => {
-      switch (this[state]) {
-        case STATE.fulfilled: {
-          return this[handleExecute](resolve, reject, onfulfilled);
-        }
+    const promise2 = new SPromise<TResult1 | TResult1>((resolve, reject) => {
+      // 放在宏任务队列中，方便取 promise2
+      setTimeout(() => {
+        switch (this[state]) {
+          case STATE.fulfilled: {
+            return this[handleExecute]<TResult1 | TResult1>(resolve, reject, promise2, onfulfilled);
+          }
 
-        case STATE.rejected: {
-          return this[handleExecute](resolve, reject, onrejected);
-        }
+          case STATE.rejected: {
+            return this[handleExecute]<TResult1 | TResult1>(resolve, reject, promise2, onrejected);
+          }
 
-        default:
-        case STATE.pending: {
-          this[fulfilledCBs].push(() => {
-            return this[handleExecute](resolve, reject, onfulfilled);
-          });
-          this[rejectedCBs].push(() => {
-            return this[handleExecute](resolve, reject, onrejected);
-          });
+          default:
+          case STATE.pending: {
+            this[fulfilledCBs].push(() => {
+              return this[handleExecute]<TResult1 | TResult1>(resolve, reject, promise2, onfulfilled);
+            });
+            this[rejectedCBs].push(() => {
+              return this[handleExecute]<TResult1 | TResult1>(resolve, reject, promise2, onrejected);
+            });
+          }
         }
-      }
+      }, 0);
     });
+    return promise2;
   }
 
-  catch(onrejected?: RejectedCB): SPromise<T> {
+  catch<TResult = never>(onrejected?: RejectedCB<TResult>): SPromise<T | TResult> {
     return this.then(null, onrejected);
   }
 }
