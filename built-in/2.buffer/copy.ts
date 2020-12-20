@@ -36,4 +36,8 @@ const buf2 = Buffer.from('控制台');
 const copyBuffer = Buffer.alloc(15);
 buf1.copy(copyBuffer, 0, 3, -1);
 buf2.copy(copyBuffer, 6, 0, 9);
+console.log(copyBuffer);
+console.log(copyBuffer.length);
 console.log(copyBuffer.toString());
+
+export {};
