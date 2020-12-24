@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/sml782/magic-of-node#readme",
   "devDependencies": {
-    "@types/node": "^14.14.12",
+    "@types/node": "^10.x",
     "nodemon": "^2.0.6",
     "promises-aplus-tests": "^2.1.2",
     "ts-node": "^9.1.1",
