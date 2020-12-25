@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const writeFile = path.resolve(__dirname, './write.txt');
+const writeFile = path.resolve(__dirname, './testfile/write.txt');
 
 const ws = fs.createWriteStream(writeFile, {
   flags: 'w',

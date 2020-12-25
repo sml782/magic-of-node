@@ -5,7 +5,7 @@ import createReadStream from './ReadStream';
 
 register();
 
-const readFile = path.resolve(__dirname, './read.txt');
+const readFile = path.resolve(__dirname, './testfile/read.txt');
 
 const rs = createReadStream(readFile, {
 // const rs = fs.createReadStream(readFile, {
