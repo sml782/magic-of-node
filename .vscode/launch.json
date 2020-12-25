@@ -11,7 +11,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/promise/src/usePromise.ts",
+      "program": "${workspaceFolder}/built-in/3.stream/rs.ts",
       "outFiles": [
         "${workspaceFolder}/**/*.js"
       ],

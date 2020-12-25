@@ -1,9 +1,14 @@
 import fs from 'fs';
 import path from 'path';
+import { register } from 'ts-node';
+import createReadStream from './ReadStream';
+
+register();
 
 const readFile = path.resolve(__dirname, './read.txt');
 
-const rs = fs.createReadStream(readFile, {
+const rs = createReadStream(readFile, {
+// const rs = fs.createReadStream(readFile, {
   flags: 'r',
   encoding: undefined,
   autoClose: true,
@@ -31,6 +36,10 @@ rs.on('error', (error) => {
 rs.on('data', (buf: Buffer) => {
   console.log('[data]', buf, buf.toString());
   dataBuf.push(buf);
+  rs.pause();
+  setTimeout(() => {
+    rs.resume();
+  }, 1000);
 });
 
 rs.on('end', () => {
