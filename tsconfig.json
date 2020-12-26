@@ -63,6 +63,7 @@
     "resolveJsonModule": true
   },
   "exclude": [
+    "dist",
     "cli",
     "egg",
     "koa",
