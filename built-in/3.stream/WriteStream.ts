@@ -19,10 +19,52 @@ interface CacheListItem {
 
 type WriteCallback = (error: Error | null | undefined) => void;
 
-type WriteFunc =
+type WriteFunc1 =
   ((chunk: any, cb?: WriteCallback) => boolean)
   |
   ((chunk: any, encoding?: string, cb?: WriteCallback) => boolean);
+
+function writeFunc(chunk: any, cb?: WriteCallback): boolean;
+function writeFunc(chunk: any, encoding?: string, cb?: WriteCallback): boolean;
+function writeFunc(this: WriteStream) {
+  const args = Array.from(arguments);
+  let chunk = args[0];
+  let encoding = this.encoding;
+  let callback: WriteCallback;
+  if (!Buffer.isBuffer(chunk)) {
+    chunk = Buffer.from(chunk);
+  }
+  this.length += chunk.length;
+  const result = this.length < this.highWaterMark;
+  this.needDrain = !result;
+
+  if (typeof args[1] === 'string') {
+    encoding = args[1];
+    callback = args[2];
+  } else {
+    callback = args[1];
+  }
+
+  const clearCacheList = () => {
+    this._clearCacheList();
+    callback(null);
+  }
+
+  const cacheListItem = {
+    chunk,
+    encoding,
+    callback: clearCacheList,
+  };
+
+  if (this.writable) {
+    this.cacheList.push(cacheListItem);
+  } else {
+    this.writable = true;
+    this._write(cacheListItem);
+  }
+
+  return result;
+}
 
 class WriteStream extends EventEmitter {
   filePath = '';
@@ -34,14 +76,17 @@ class WriteStream extends EventEmitter {
   start = 0;
   highWaterMark = 64 * 1024;
   offset: number;
+  length: number;
   writable = false;
   cacheList: CacheListItem[] = [];
+  needDrain = false;
 
   constructor(path: string, options?: string | WSOptions) {
     super();
 
     this.filePath = path;
     this.offset = 0;
+    this.length = 0;
 
     if (!options) {
       return;
@@ -91,27 +136,37 @@ class WriteStream extends EventEmitter {
     });
   }
 
-  _write() {
-
+  _clearCacheList() {
+    if (this.needDrain) {
+      this.needDrain = false;
+      this.emit('drain');
+    }
+    if (!this.cacheList.length) {
+      this.emit('finish');
+      this.destroy();
+      return;
+    }
+    const wItem = this.cacheList.shift();
+    if (!wItem) {
+      this._clearCacheList();
+      return;
+    }
+    this._write(wItem);
   }
 
-  write: WriteFunc = (...args) => {
-    let chunk = args[0];
-    let encoding = this.encoding;
-    let callback: WriteCallback;
-    if (!Buffer.isBuffer(chunk)) {
-      chunk = Buffer.from(chunk);
+  _write(wItem: CacheListItem) {
+    if (typeof this.fd !== 'number') {
+      this.once('open', () => this._write(wItem));
+      return;
     }
-
-    if (typeof args[1] === 'string') {
-      encoding = args[1];
-      callback = args[2];
-    } else {
-      callback = args[1];
-    }
-
-    return false;
+    fs.write(this.fd, wItem.chunk, 0, wItem.chunk.length, this.offset, (err, written) => {
+      this.offset += written;
+      this.length -= written;
+      wItem.callback(err);
+    });
   }
+
+  write = writeFunc.bind(this);
 }
 
 export default (path: string, options?: string | WSOptions) => {

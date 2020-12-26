@@ -11,7 +11,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/built-in/3.stream/rs.ts",
+      "program": "${workspaceFolder}/built-in/3.stream/ws.ts",
       "outFiles": [
         "${workspaceFolder}/**/*.js"
       ],

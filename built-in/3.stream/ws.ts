@@ -4,15 +4,20 @@
 
 import fs from 'fs';
 import path from 'path';
+import { register } from 'ts-node';
+import createWriteStream from './WriteStream';
+
+register();
 
 const writeFile = path.resolve(__dirname, './testfile/write.txt');
 
-const ws = fs.createWriteStream(writeFile, {
+const ws = createWriteStream(writeFile, {
+// const ws = fs.createWriteStream(writeFile, {
   flags: 'w',
   encoding: undefined,
   autoClose: true,
   start: 0,
-  highWaterMark: 3,
+  highWaterMark: 1,
   mode: 0o666,
 });
 
@@ -57,7 +62,7 @@ flag = ws.write('o', (err) => {
 });
 console.log(flag);
 
-flag = ws.write('o', (err) => {
+flag = ws.write('ok', (err) => {
   if (err) {
     console.log('[error]', err.message);
   }
