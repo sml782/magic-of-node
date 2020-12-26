@@ -1,3 +1,7 @@
+// 可写流也是基于fs模块的 但是内部是 继承自stream流中writable接口
+// 同步写入，会批量写入，第一次调用fs.write, 后面的操作都放到了内存中
+// 读和写的搭配流程 先读取=》调用write方法写入，如果放下超过预期，暂停读取 =》 等待写入完毕后=》触发drain事件=》在恢复读取，周而复始。 实现边读边写的功能
+
 import fs from 'fs';
 import path from 'path';
 

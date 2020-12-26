@@ -1,3 +1,5 @@
+// 文件流可读流 是基于stream模块中Readable接口
+
 import fs from 'fs';
 import path from 'path';
 import { register } from 'ts-node';
