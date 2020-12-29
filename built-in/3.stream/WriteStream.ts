@@ -74,7 +74,7 @@ class WriteStream extends EventEmitter {
   mode = 0o666;
   autoClose = true;
   start = 0;
-  highWaterMark = 64 * 1024;
+  highWaterMark = 16 * 1024;
   offset: number;
   length: number;
   writable = false;
@@ -104,7 +104,7 @@ class WriteStream extends EventEmitter {
     this.mode = options.mode || 0o666;
     this.autoClose = options.autoClose || true;
     this.start = options.start || 0;
-    this.highWaterMark = options.highWaterMark || 64 * 1024;
+    this.highWaterMark = options.highWaterMark || 16 * 1024;
 
     // 打开文件
     this.open();
