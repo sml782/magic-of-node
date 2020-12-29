@@ -4,15 +4,7 @@ import path from 'path';
 const readFile = path.resolve(__dirname, './testfile/read.txt');
 const writeFile = path.resolve(__dirname, './testfile/write.txt');
 
-const rs = fs.createReadStream(readFile, {
-  flags: 'r',
-  encoding: 'utf8',
-  mode: 0o666,
-  autoClose: true,
-  start: 0,
-  end: 9,
-  highWaterMark: 3,
-});
-
-
+const rs = fs.createReadStream(readFile);
 const ws = fs.createWriteStream(writeFile);
+
+rs.pipe(ws);

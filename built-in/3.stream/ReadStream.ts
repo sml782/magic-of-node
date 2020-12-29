@@ -75,6 +75,23 @@ class ReadStream extends EventEmitter {
     }
   }
 
+  pipe(destination: fs.WriteStream, options?: { end?: boolean }) {
+    this.on('data', (buf) => {
+      const writeable = destination.write(buf);
+      if (!writeable) {
+        this.pause();
+      }
+    });
+    destination.on('drain', () => {
+      this.resume();
+    });
+    this.on('end', () => {
+      if (options?.end) {
+        destination.end();
+      }
+    });
+  }
+
   destroy(error?: NodeJS.ErrnoException | null) {
     if (error) {
       this.emit('error', error);
