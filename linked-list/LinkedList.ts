@@ -1,5 +1,22 @@
 import assert from 'assert';
 
+/**
+ * 递归反转
+ * 两两转
+ *
+ * @param {LinkNode} head
+ * @returns
+ */
+function reverse1(head: LinkNode) {
+  if (head === null || head.next === null) {
+    return head;
+  }
+  const newHead = arguments.callee(head.next);
+  head.next.next = head;
+  head.next = null;
+  return newHead;
+}
+
 class LinkNode {
   constructor(public value: any, public next: LinkNode | null) {}
 }
