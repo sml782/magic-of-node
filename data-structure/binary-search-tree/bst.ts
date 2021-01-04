@@ -29,6 +29,15 @@ class BST {
     let currentNode = this.root;
     while (currentNode) {
       const isbig = this.compare!(currentNode.value, value);
+
+      // 左边
+      if (isbig) {
+
+        continue;
+      }
+
+      // 右边
+
     }
   }
 }
