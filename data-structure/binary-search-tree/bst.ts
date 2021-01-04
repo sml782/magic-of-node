@@ -26,19 +26,25 @@ class BST {
       return;
     }
 
-    let currentNode = this.root;
+    let currentNode: TNode | null = this.root;
+    let currentParent: TNode | null = null;
+    let dir = true;
     while (currentNode) {
+      currentParent = currentNode;
       const isbig = this.compare!(currentNode.value, value);
+      dir = isbig;
 
       // 左边
       if (isbig) {
-
+        currentNode = currentNode.left;
         continue;
       }
 
       // 右边
-
+      currentNode = currentNode.right;
     }
+
+    currentParent![dir ? 'left' : 'right'] = new TNode(value, currentParent);
   }
 }
 
